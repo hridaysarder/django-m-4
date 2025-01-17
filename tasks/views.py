@@ -10,4 +10,7 @@ def user_dashboard(request):
     return render(request,"dashboard/user-dashboard.html")
 
 def test(request):
-    return render(request,"test.html")
+    context={
+        'name':['Hriday','Sarder','Talha']
+    }
+    return render(request,"test.html",context)

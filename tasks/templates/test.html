@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   </head>
   <body>
-    <h2 class="lal-bg">This is test</h2>
-    <img src="{% static "images/ugv.jpg" %}" alt="">
+    {% for name in names %}
+    <p>{{ name }}</p>
+    {% endfor %}
   </body>
 </html>
