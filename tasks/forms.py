@@ -1,5 +1,5 @@
 from django import forms
-from tasks.models import Task
+from tasks.models import Task, TaskDetail
 
 
 class TaskForm(forms.Form):
@@ -18,26 +18,45 @@ class TaskForm(forms.Form):
             (emp.id, emp.name) for emp in employees]
 
 
-class TaskModelForm(forms.ModelForm):
+class StyledFormMixin:
+
+    default_classes = "border-2 border-gray-300 w-full p-3 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500"
+
+    def apply_styled_widgets(self):
+        for field_name, field in self.fields.items():
+            if isinstance(field.widget, forms.TextInput):
+                field.widget.attrs.update({
+                    'class': self.default_classes,
+                    'placeholder': f"Enter {field.label.lower()}"
+                })
+            elif isinstance(field.widget, forms.Textarea):
+                field.widget.attrs.update({
+                    'class': f"{self.default_classes} resize-none",
+                    'placeholder': f"Enter {field.label.lower()}",
+                    'rows': 4
+                })
+
+
+class TaskModelForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = Task
         fields = ['title', 'description', 'due_date', 'assigned_to']
 
-        # exclude=['project','is_completed','created_at','updated_at']
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'class': "border-2 border-gray-300 w-full rounded-lg shadow-md focus:border-rose-500 focus:ring-rose-500",
-                'placeholder': 'Enter task title'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': "border-2 border-gray-300 w-full rounded-lg shadow-md focus:border-rose-500 focus:ring-rose-500",
-                'placeholder': 'Describe the task'
-            }),
-            'due_date': forms.SelectDateWidget(attrs={
-                'class': "border-2 border-gray-300 rounded-lg shadow-md focus:border-rose-500 focus:ring-rose-500",
-
-            }),
-            'assigned_to': forms.CheckboxSelectMultiple(attrs={
-                'class': "border-gray-300 rounded-lg shadow-md focus:border-rose-500 focus:ring-rose-500",
-            })
+        widgets={
+            'due_date':forms.SelectDateWidget,
+            'assigned_to':forms.CheckboxSelectMultiple
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.apply_styled_widgets()
+
+
+class TaskDetailModelForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = TaskDetail
+        fields = ['priority', 'notes']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.apply_styled_widgets()
