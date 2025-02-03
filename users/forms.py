@@ -2,6 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
 import re
+from tasks.forms import StyledFormMixin
 
 
 class RegisterForm(UserCreationForm):
@@ -16,7 +17,7 @@ class RegisterForm(UserCreationForm):
             self.fields[fieldname].help_text = None
 
 
-class CustomRegistrationForm(forms.ModelForm):
+class CustomRegistrationForm(StyledFormMixin,forms.ModelForm):
     password1 = forms.CharField(widget=forms.PasswordInput)
     confirm_password = forms.CharField(widget=forms.PasswordInput)
 
@@ -46,8 +47,6 @@ class CustomRegistrationForm(forms.ModelForm):
             errors.append('Password must include at least one number')
         if not re.search(r'[@#$%^&+=]',password1):
             errors.append('Password must include at least one special character')
-        if 'abc' not in password1:
-            errors.append('Password must include abc')
         if errors:
             raise forms.ValidationError(errors)
         return password1
