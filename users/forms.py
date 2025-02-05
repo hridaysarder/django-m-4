@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django import forms
 import re
 from tasks.forms import StyledFormMixin
+from django.contrib.auth.forms import AuthenticationForm
 
 
 class RegisterForm(UserCreationForm):
@@ -27,7 +28,7 @@ class CustomRegistrationForm(StyledFormMixin,forms.ModelForm):
                   'password1', 'confirm_password', 'email']
 
     def clean_email(self):
-        email=self.changed_data.get('email')
+        email=self.cleaned_data.get('email')
         email_exists=User.objects.filter(email=email).exists()
         
         if email_exists:
@@ -56,3 +57,8 @@ class CustomRegistrationForm(StyledFormMixin,forms.ModelForm):
         confirm_password=cleaned_data.get('confirm_password')
         if password1 != confirm_password:
             raise forms.ValidationError('Password do not match')
+
+class loginForm(StyledFormMixin,AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
