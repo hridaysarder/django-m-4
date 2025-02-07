@@ -1,11 +1,18 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from tasks.forms import TaskModelForm, TaskDetailModelForm
-from tasks.models import Employee, Task
+from tasks.models import Employee, Task,Project
 from django.db.models import Count, Q
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required,user_passes_test,permission_required
 
 
+def is_manager(user):
+    return user.groups.filter(name='Manager').exists()
+def is_employee(user):
+    return user.groups.filter(name='Employee').exists()
+
+@user_passes_test(is_manager,login_url='no-permission')
 def manager_dashboard(request):
 
     # total_task = tasks.count()
@@ -41,18 +48,13 @@ def manager_dashboard(request):
 
     return render(request, "dashboard/manager-dashboard.html", context)
 
-
-def user_dashboard(request):
+@user_passes_test(is_employee,login_url='no-permission')
+def employee_dashboard(request):
     return render(request, "dashboard/user-dashboard.html")
 
 
-def test(request):
-    context = {
-        'names': ['Hriday', 'Sarder', 'Talha']
-    }
-    return render(request, "test.html", context)
-
-
+@login_required
+@permission_required('tasks.add_task',login_url='no-permission')
 def create_task(request):
     employees = Employee.objects.all()
     task_form = TaskModelForm()  # For GET
@@ -75,7 +77,8 @@ def create_task(request):
     context = {"task_form": task_form, "task_detail_form": task_detail_form}
     return render(request, "task_form.html", context)
 
-
+@login_required
+@permission_required('tasks.change_task',login_url='no-permission')
 def update_task(request, id):
     task = Task.objects.get(id=id)
     task_form = TaskModelForm(instance=task)  # For GET
@@ -100,6 +103,9 @@ def update_task(request, id):
     context = {"task_form": task_form, "task_detail_form": task_detail_form}
     return render(request, "task_form.html", context)
 
+
+@login_required
+@permission_required('tasks.delete_task',login_url='no-permission')
 def delete_task(request,id):
     if request.method=="POST":
         tasks=Task.objects.get(id=id)
@@ -111,10 +117,15 @@ def delete_task(request,id):
         return redirect('manager-dashboard')
 
 
+@login_required
+@permission_required('tasks.view_task',login_url='no-permission')
 def view_task(request):
-    tasks = Task.objects.all()
+    # tasks = Task.objects.all()
 
-    task3 = Task.objects.get(id=1)
+    # task3 = Task.objects.get(id=1)
 
-    first_task = Task.objects.first()
-    return render(request, "show_task.html", {"tasks": tasks, "task3": task3, "first_task": first_task})
+    # first_task = Task.objects.first()
+    # return render(request, "show_task.html", {"tasks": tasks, "task3": task3, "first_task": first_task})
+    projects=Project.objects.annotate(
+        num_task=Count('task')).order_by('num_task')
+    return render(request,'show-task.html',{"projects":projects})
