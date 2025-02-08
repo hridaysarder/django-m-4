@@ -21,7 +21,9 @@
               >Dashboard</a
             >
             <a href="#" class="text-gray-600 hover:text-gray-800">Tasks</a>
-            <a href="{% url 'group-list' %}" class="text-gray-600 hover:text-gray-800"
+            <a
+              href="{% url 'group-list' %}"
+              class="text-gray-600 hover:text-gray-800"
               >Groups</a
             >
             <a
@@ -52,7 +54,7 @@
                   >Dashboard</a
                 >
                 <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
+                  {% csrf_token %}
                   <button
                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
@@ -100,13 +102,11 @@
         </div>
       </nav>
     </header>
-    {% block content %}
-     {% include "admin/user_list.html" %}
-    {% endblock content %}
+
     <main>
-      {% comment %} <div class="container mx-auto px-6 py-4">
-        <p>Content goes here...</p>
-      </div> {% endcomment %}
+      {% block content %}
+        {% include "admin/user_list.html" %} 
+      {% endblock content %}
     </main>
 
     <script>

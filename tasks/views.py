@@ -120,12 +120,6 @@ def delete_task(request,id):
 @login_required
 @permission_required('tasks.view_task',login_url='no-permission')
 def view_task(request):
-    # tasks = Task.objects.all()
-
-    # task3 = Task.objects.get(id=1)
-
-    # first_task = Task.objects.first()
-    # return render(request, "show_task.html", {"tasks": tasks, "task3": task3, "first_task": first_task})
     projects=Project.objects.annotate(
         num_task=Count('task')).order_by('num_task')
     return render(request,'show-task.html',{"projects":projects})
