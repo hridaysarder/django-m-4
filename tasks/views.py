@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from tasks.forms import TaskModelForm, TaskDetailModelForm
-from tasks.models import Employee, Task,Project
+from tasks.models import Task,Project
 from django.db.models import Count, Q
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required,user_passes_test,permission_required
@@ -56,7 +56,7 @@ def employee_dashboard(request):
 @login_required
 @permission_required('tasks.add_task',login_url='no-permission')
 def create_task(request):
-    employees = Employee.objects.all()
+    # employees = Employee.objects.all()
     task_form = TaskModelForm()  # For GET
     task_detail_form = TaskDetailModelForm()
 
@@ -123,3 +123,9 @@ def view_task(request):
     projects=Project.objects.annotate(
         num_task=Count('task')).order_by('num_task')
     return render(request,'show-task.html',{"projects":projects})
+
+@login_required
+@permission_required('tasks.view_task',login_url='no-permission')
+def task_details(request,task_id):
+    task=Task.objects.get(id=task_id)
+    return render(request,'task_details.html',{'task':task})
