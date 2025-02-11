@@ -62,14 +62,6 @@
             <!-- Creation Date -->
             <div class="text-gray-600 mb-6">{{task.created_at}}</div>
 
-            <!-- Metrics -->
-            <div class="mb-8">
-              <div class="flex items-center gap-2">
-                <span class="font-semibold">Assets:</span>
-                <span>3</span>
-              </div>
-            </div>
-
             <!-- Task Team -->
             <div class="mb-9">
               <h2 class="text-xl font-bold mb-4">TASK TEAM</h2>
@@ -83,7 +75,7 @@
                   </div>
                   <div>
                     <div class="font-semibold">{{emp.first_name}} {{emp.last_name}}</div>
-                    <div class="text-gray-600">Administrator</div>
+                    <div class="text-gray-600">{{emp.groups.first.name|default:"No Role"}}</div>
                   </div>
                 </div>
                {% endfor %}
@@ -115,7 +107,7 @@
             <h2 class="text-xl font-bold mb-4">ASSETS</h2>
             <div class="space-y-4">
               <img
-                src="/placeholder.svg?height=200&width=300"
+                src={{task.details.asset.url}}
                 alt="Task Manager App Screenshot 1"
                 class="w-full rounded-lg"
               />

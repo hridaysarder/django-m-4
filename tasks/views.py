@@ -5,10 +5,12 @@ from tasks.models import Task,Project
 from django.db.models import Count, Q
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required,user_passes_test,permission_required
+from users.views import is_admin
 
 
 def is_manager(user):
     return user.groups.filter(name='Manager').exists()
+
 def is_employee(user):
     return user.groups.filter(name='Employee').exists()
 
@@ -20,6 +22,8 @@ def manager_dashboard(request):
     # in_progress_task = Task.objects.filter(status="IN_PROGRESS").count()
     # pending_task = Task.objects.filter(status="PENDING").count()
 
+    type = request.GET.get('type', 'all')
+
     counts = Task.objects.aggregate(
         total=Count('id'),
         completed_task=Count('id', filter=Q(status='COMPLETED')),
@@ -27,14 +31,13 @@ def manager_dashboard(request):
         pending_task=Count('id', filter=Q(status='PENDING'))
     )
 
-    type = request.GET.get('type', 'all')
 
     base_query = Task.objects.select_related(
         'details').prefetch_related('assigned_to')
 
     if type == 'completed':
         tasks = base_query.filter(status='COMPLETED')
-    elif type == 'in_progress':
+    elif type == 'in-progress':
         tasks = base_query.filter(status='IN_PROGRESS')
     elif type == 'pending':
         tasks = base_query.filter(status='PENDING')
@@ -43,12 +46,13 @@ def manager_dashboard(request):
 
     context = {
         "tasks": tasks,
-        "counts": counts
+        "counts": counts,
+        "role":'manager'
     }
 
     return render(request, "dashboard/manager-dashboard.html", context)
 
-@user_passes_test(is_employee,login_url='no-permission')
+@user_passes_test(is_employee)
 def employee_dashboard(request):
     return render(request, "dashboard/user-dashboard.html")
 
@@ -62,7 +66,7 @@ def create_task(request):
 
     if request.method == "POST":
         task_form = TaskModelForm(request.POST)
-        task_detail_form = TaskDetailModelForm(request.POST)
+        task_detail_form = TaskDetailModelForm(request.POST,request.FILES)
         if task_form.is_valid() and task_detail_form.is_valid():
 
             '''For Model Form Data'''
