@@ -102,7 +102,7 @@ def update_task(request, id):
             task_detail.save()
 
             messages.success(request, 'Task updated successfully')
-            return redirect('update-task',id)
+            return redirect('task-details',id)
 
     context = {"task_form": task_form, "task_detail_form": task_detail_form}
     return render(request, "task_form.html", context)
@@ -132,4 +132,22 @@ def view_task(request):
 @permission_required('tasks.view_task',login_url='no-permission')
 def task_details(request,task_id):
     task=Task.objects.get(id=task_id)
-    return render(request,'task_details.html',{'task':task})
+    status_choices=Task.STATUS_CHOICES
+
+    if request.method=='POST':
+        selected_status=request.POST.get('task_status')
+        task.status=selected_status
+        task.save()
+        return redirect('task-details',task.id)
+    return render(request,'task_details.html',{'task':task,'status_choices':status_choices})
+
+@login_required
+def dashboard(request):
+    if is_manager(request.user):
+        return redirect('manager-dashboard')
+    elif is_employee(request.user):
+        return redirect('user-dashboard')
+    elif is_admin(request.user):
+        return redirect('admin-dashboard')
+    
+    return redirect('no-permission')
